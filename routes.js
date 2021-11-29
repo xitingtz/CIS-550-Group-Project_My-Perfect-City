@@ -32,6 +32,28 @@ async function search_by_job_count(req, res) {
         });
 }
 
+// search by crime rate(Xiting)
+async function search_by_crime_rate(req, res) {
+    var crimeRateLow = req.query.crimeRateLow ? req.query.crimeRateLow : 0
+    var query =`
+    SELECT ct.city, ct.state_id, cr.crime_rate_per_100000
+    FROM US_Cities ct JOIN CRIME_RATE cr ON ct.county_fips = cr.fips_county
+    WHERE cr.crime_rate_per_100000 <= ${crimeRateLow}
+    ORDER BY crime_rate_per_100000;
+    `;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            if(results.length == 0){
+                res.json({ results: []})
+            } else {
+                res.json({ results: results })
+            }
+        }
+    });
+}
 
 
 
@@ -60,6 +82,38 @@ async function Job_Market_Grade(req, res) {
             }
         });
 }
+
+//crime rate grade(Xiting)
+async function safety_grade(req, res) {
+    var city = req.query.city;
+    var stateID = req.query.stateID;
+    var query =`
+    SELECT city, state_id, crime_rate_per_100000,
+       CASE
+       WHEN crime_rate_per_100000 >= 0 AND crime_rate_per_100000 < 200 THEN 'A'
+       WHEN crime_rate_per_100000 >=200 AND crime_rate_per_100000 < 400 THEN 'B'
+       WHEN crime_rate_per_100000 >=400 AND crime_rate_per_100000 < 600 THEN 'C'
+       WHEN crime_rate_per_100000 >=600 AND crime_rate_per_100000 < 800 THEN 'D'
+       WHEN crime_rate_per_100000 >=800 AND crime_rate_per_100000 < 1000 THEN 'E'
+       ELSE 'F'
+       END AS Safety_Grade
+    FROM CRIME_RATE cr JOIN US_Cities ct ON cr.fips_county = ct.county_fips
+    WHERE city = ${city} AND state_id = ${stateID};
+    `;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            if(results.length == 0){
+                res.json({ results: []})
+            } else {
+                res.json({ results: results })
+            }
+        }
+    });
+}
+
 // page 4 order by job count
 async function Order_By_Job_Count(req, res) {
 
@@ -75,6 +129,42 @@ async function Order_By_Job_Count(req, res) {
                 res.json({ results: results })
             }
         });
+}
+
+// page 4 order by crime rate(Xiting)
+async function order_by_crime_rate(req, res) {
+    var num_of_cities = req.query.num_of_cities? req.query.num_of_cities : 10;
+    var query =`
+    WITH Top_City_By_County AS (
+        SELECT city, ct.state_id, ct.county_fips, ct.population
+        FROM US_Cities ct
+        INNER JOIN (
+            SELECT county_fips, MAX(population) AS max_population
+            FROM US_Cities
+            GROUP BY county_fips
+            ) m
+       ON ct.county_fips = m.county_fips AND ct.population = m.max_population
+       )
+      
+     SELECT city, state_id, crime_rate_per_100000
+     FROM CRIME_RATE cr JOIN Top_City_By_County ct ON cr.fips_county = ct.county_fips
+     WHERE crime_rate_per_100000 > 0
+     ORDER BY crime_rate_per_100000
+     LIMIT ${num_of_cities};
+     
+    `;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            if(results.length == 0){
+                res.json({ results: []})
+            } else {
+                res.json({ results: results })
+            }
+        }
+    });
 }
 
 // page 5 job_post
@@ -93,6 +183,40 @@ async function job_post(req, res) {
                 res.json({ results: results })
             }
         });
+}
+
+//page 5 compare two cities (Xiting)
+async function data_by_city(req, res) {
+    var city = req.query.city;
+    var stateID = req.query.stateID;
+    var query =`
+    WITH JOB_COUNT AS (
+        SELECT locality AS city, COUNT(_id) AS num_of_jobs
+        FROM JOB_POSTS
+        GROUP BY city
+    )
+    SELECT c.city, s.state_name, h.med_price, v.people_fully_vaccinated_per_hundred, cr.crime_rate_per_100000,
+        j.num_of_jobs
+    FROM US_Cities c
+    JOIN US_States s ON c.state_id = s.state_id
+    JOIN VACCINATION v ON v.state_name = s.state_name
+    JOIN HOUSE_PRICE h ON h.state = c.state_id
+    JOIN CRIME_RATE cr ON cr.fips_county = c.county_fips
+    JOIN JOB_COUNT j ON j.city = c.city
+    WHERE c.city LIKE "${city}" AND c.state_id LIKE "${stateID}"
+    `;
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            if(results.length == 0){
+                res.json({ results: []})
+            } else {
+                res.json({ results: results })
+            }
+        }
+    });
 }
 
 // Cici's code: Page 2 - Search Mode - search cities by vaccination with minimum rate 
@@ -205,5 +329,9 @@ module.exports = {
     job_post,
     search_cities_by_vaccination,
     rank_cities,
-    rank_cities_by_vaccination_rate
+    rank_cities_by_vaccination_rate,
+    search_by_crime_rate,
+    safety_grade,
+    order_by_crime_rate,
+    data_by_city
 }
