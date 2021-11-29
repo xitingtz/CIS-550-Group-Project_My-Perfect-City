@@ -95,11 +95,29 @@ async function job_post(req, res) {
         });
 }
 
+// Cici's code: search cities by vaccination 
+async function search_cities_by_vaccination(req, res) {
 
+    const jobPostCountLow = req.query.PostCountLow? req.query.PostCountLow : 0;
+        connection.query(`SELECT locality as city, COUNT(_id) as num_of_jobs
+        from JOB_POSTS
+        group by city
+        HAVING COUNT(_id) >= ${jobPostCountLow}
+        order by num_of_jobs DESC;
+        `, function (error, results, fields) {
+            if (error) {
+                console.log(error)
+                res.json({ error: error })
+            } else if (results) {
+                res.json({ results: results })
+            }
+        });
+}
 
 module.exports = {
     search_by_job_count,
     Job_Market_Grade,
     Order_By_Job_Count,
-    job_post
+    job_post,
+    search_cities_by_vaccination
 }
