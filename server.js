@@ -8,8 +8,8 @@ const config = require('./config.json')
 const app = express();
 
 app.get('/Job_Market_Grade', routes.Job_Market_Grade)
-app.get('/search_by_job_count/:PostCountLow', routes.search_by_job_count)
-app.get('/Order_By_Job_Count', routes.Order_By_Job_Count)
+app.get('/search_jobCount', routes.search_by_job_count)
+app.get('/Order_Job_Count', routes.Order_By_Job_Count)
 app.get('/job_post', routes.job_post)
 
 //cici's code

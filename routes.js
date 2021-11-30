@@ -16,11 +16,11 @@ connection.connect();
 // search by job count
 async function search_by_job_count(req, res) {
 
-    const jobPostCountLow = req.query.PostCountLow? req.query.PostCountLow : 0;
+    const PostCountLow = req.query.PostCountLow? req.query.PostCountLow : 0;
         connection.query(`SELECT locality as city, COUNT(_id) as num_of_jobs
         from JOB_POSTS
         group by city
-        HAVING COUNT(_id) >= ${jobPostCountLow}
+        HAVING COUNT(_id) >= ${PostCountLow}
         order by num_of_jobs DESC;
         `, function (error, results, fields) {
             if (error) {
@@ -72,7 +72,7 @@ async function Job_Market_Grade(req, res) {
         ELSE 'F'
     END AS JOB_MARKET_GRADE
  FROM JOB_POSTS
- WHERE locality = ${locality} AND region = ${region};
+ WHERE locality = '${locality}' AND region = '${region}';
         `, function (error, results, fields) {
             if (error) {
                 console.log(error)
