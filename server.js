@@ -18,10 +18,12 @@ app.get('/rank_cities', routes.rank_cities)
 app.get('/rank_cities_by_vaccination_rate', routes.rank_cities_by_vaccination_rate)
 
 //xiting's code
-app.get('/search_by_crime_rate', routes.search_by_crime_rate)
+app.get('/search_cities/crimeRate', routes.search_by_crime_rate)
 app.get('/safety_grade', routes.safety_grade)
-app.get('order_by_crime_rate', routes.order_by_crime_rate)
-app.get('data_by_city', routes.data_by_city)
+app.get('/order/crimeRate', routes.order_by_crime_rate)
+app.get('/compare/city', routes.data_by_city)
+app.get('/search_cities/rent', routes.search_by_rent)
+app.get('/order/rent',routes.order_by_rent)
 
 //Yugui's code
 app.get('/search/:choice', routes.search_mode)

@@ -34,14 +34,55 @@ async function search_by_job_count(req, res) {
 
 // search by crime rate(Xiting)
 async function search_by_crime_rate(req, res) {
-    var crimeRateLow = req.query.crimeRateLow ? req.query.crimeRateLow : 0
-    var query =`
+    const crimeRateHigh = req.query.crimeRateHigh ? req.query.crimeRateHigh : 1800;
+    const query =`
     SELECT ct.city, ct.state_id, cr.crime_rate_per_100000
     FROM US_Cities ct JOIN CRIME_RATE cr ON ct.county_fips = cr.fips_county
-    WHERE cr.crime_rate_per_100000 <= ${crimeRateLow}
+    WHERE cr.crime_rate_per_100000 <= ${crimeRateHigh} AND cr.crime_rate_per_100000 > 0
     ORDER BY crime_rate_per_100000;
     `;
     connection.query(query, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            if(results.length == 0){
+                res.json({ results: []})
+            } else {
+                res.json({ results: results })
+            }
+        }
+    });
+}
+
+//search by rent(Xiting)
+async function search_by_rent(req, res) {
+    const avgRentLow = req.query.avgRentLow ? req.query.avgRentLow : 0;
+    const avgRentHigh = req.query.avgRentHigh ? req.query.avgRentHigh : 190000.00;
+    const pool = req.query.pool ? req.query.pool : 0;
+    const dishwasher = req.query.dishwasher ? req.query.dishwasher : 0;
+    const washerDryer = req.query.washerDryer ? req.query.washerDryer : 0;
+    const ac = req.query.ac ? req.query.ac : 0;
+    const parking = req.query.parking ? req.query.parking : 0;
+    const numBedsLow = req.query.numBedsLow ? req.query.numBedsLow : 0;
+    const numBathsLow = req.query.numBathsLow ? req.query.numbathLow : 0;
+    const houseType = req.query.houseType ? req.query.houseType :""; //['Apartment', 'Condo/Multiplex', 'House','In-Law/Basement', 'Single Room', 'Sublease or Student Cont', 'Townhome' ]
+    const sqftLow = req.query.sqftLow ? req.query.sqftLow : 0;
+    const smoking = req.query.smoking ? req.query.smoking :"No"; //['Yes', 'No']
+    const pets = req.query.pets ? req.query.pets : "Yes"; //['Yes', 'No']
+    const securityDeposit = req.query.securityDeposit ? req.query.securityDeposit : 0;
+    const sql =`
+    SELECT city, state, AVG(price) AS average_rent
+    FROM Rental_Properties
+    WHERE pool >= ${pool} AND dishwasher >= ${dishwasher} AND washer_dryer >= ${washerDryer} AND
+        ac >= ${ac} AND parking >= ${parking} AND num_beds >= ${numBedsLow} AND num_baths >= ${numBathsLow}
+        AND house_type LIKE '%${houseType}%' AND sqft >= ${sqftLow} AND smoking ='${smoking}' AND pets ='${pets}' 
+        AND security_deposit >= ${securityDeposit}
+    GROUP BY city, state
+    HAVING average_rent >= ${avgRentLow} AND average_rent <= ${avgRentHigh}
+    ORDER BY average_rent;
+    `;
+    connection.query(sql, function (error, results, fields) {
         if (error) {
             console.log(error)
             res.json({ error: error })
@@ -104,9 +145,9 @@ async function Job_Market_Grade(req, res) {
 
 //crime rate grade(Xiting)
 async function safety_grade(req, res) {
-    var city = req.query.city;
-    var stateID = req.query.stateID;
-    var query =`
+    const city = req.query.city? req.query.city : "";
+    const stateID = req.query.stateID? req.query.stateID : "";
+    const sql =`
     SELECT city, state_id, crime_rate_per_100000,
        CASE
        WHEN crime_rate_per_100000 >= 0 AND crime_rate_per_100000 < 200 THEN 'A'
@@ -117,9 +158,9 @@ async function safety_grade(req, res) {
        ELSE 'F'
        END AS Safety_Grade
     FROM CRIME_RATE cr JOIN US_Cities ct ON cr.fips_county = ct.county_fips
-    WHERE city = ${city} AND state_id = ${stateID};
+    WHERE city = '${city}' AND state_id = '${stateID}';
     `;
-    connection.query(query, function (error, results, fields) {
+    connection.query(sql, function (error, results, fields) {
         if (error) {
             console.log(error)
             res.json({ error: error })
@@ -152,8 +193,8 @@ async function Order_By_Job_Count(req, res) {
 
 // page 4 order by crime rate(Xiting)
 async function order_by_crime_rate(req, res) {
-    var num_of_cities = req.query.num_of_cities? req.query.num_of_cities : 10;
-    var query =`
+    const num_of_cities = req.query.num_of_cities? req.query.num_of_cities : 10;
+    const sql =`
     WITH Top_City_By_County AS (
         SELECT city, ct.state_id, ct.county_fips, ct.population
         FROM US_Cities ct
@@ -170,9 +211,32 @@ async function order_by_crime_rate(req, res) {
      WHERE crime_rate_per_100000 > 0
      ORDER BY crime_rate_per_100000
      LIMIT ${num_of_cities};
-     
     `;
-    connection.query(query, function (error, results, fields) {
+    connection.query(sql, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            if(results.length == 0){
+                res.json({ results: []})
+            } else {
+                res.json({ results: results })
+            }
+        }
+    });
+}
+
+//order by average rent(Xiting)
+async function order_by_rent(req, res) {
+    const num_of_cities = req.query.num_of_cities? req.query.num_of_cities : 10;
+    const sql = `
+    SELECT city, state, AVG(price) AS average_rent
+    FROM Rental_Properties
+    GROUP BY city, state
+    ORDER BY average_rent
+    LIMIT ${num_of_cities};
+    `;
+    connection.query(sql, function (error, results, fields) {
         if (error) {
             console.log(error)
             res.json({ error: error })
@@ -206,25 +270,32 @@ async function job_post(req, res) {
 
 //page 5 compare two cities (Xiting)
 async function data_by_city(req, res) {
-    var city = req.query.city;
-    var stateID = req.query.stateID;
-    var query =`
+    const city = req.query.city;
+    const stateID = req.query.stateID;
+    const sql =`
     WITH JOB_COUNT AS (
         SELECT locality AS city, COUNT(_id) AS num_of_jobs
         FROM JOB_POSTS
         GROUP BY city
+    ),
+    RENT AS (
+        SELECT city, state, AVG(price) AS average_rent
+        FROM Rental_Properties
+        GROUP BY city, state
     )
-    SELECT c.city, s.state_name, h.med_price, v.people_fully_vaccinated_per_hundred, cr.crime_rate_per_100000,
+    SELECT DISTINCT c.city, s.state_name, h.med_price, v.people_fully_vaccinated_per_hundred, cr.crime_rate_per_100000,
         j.num_of_jobs
     FROM US_Cities c
-    JOIN US_States s ON c.state_id = s.state_id
-    JOIN VACCINATION v ON v.state_name = s.state_name
-    JOIN HOUSE_PRICE h ON h.state = c.state_id
-    JOIN CRIME_RATE cr ON cr.fips_county = c.county_fips
-    JOIN JOB_COUNT j ON j.city = c.city
-    WHERE c.city LIKE "${city}" AND c.state_id LIKE "${stateID}"
+    LEFT JOIN US_States s ON c.state_id = s.state_id
+    LEFT JOIN US_Counties ct ON ct.county_fips = c.county_fips
+    LEFT JOIN VACCINATION v ON v.state_name = s.state_name
+    LEFT JOIN HOUSE_PRICE h ON h.county = ct.county_name
+    LEFT JOIN CRIME_RATE cr ON cr.fips_county = c.county_fips
+    LEFT JOIN JOB_COUNT j ON j.city = c.city
+    LEFT JOIN RENT r ON r.city = c.city AND r.state = c.state_id
+    WHERE c.city = '${city}' AND c.state_id = '${stateID}';
     `;
-    connection.query(query, function (error, results, fields) {
+    connection.query(sql, function (error, results, fields) {
         if (error) {
             console.log(error)
             res.json({ error: error })
@@ -237,7 +308,6 @@ async function data_by_city(req, res) {
         }
     });
 }
-
 
 
 // Cici's code: Page 3 - City Rank Mode - rank criterias for a single city criterias - tested
