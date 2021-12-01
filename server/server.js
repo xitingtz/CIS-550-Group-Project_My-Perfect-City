@@ -13,8 +13,8 @@ app.get('/Order_Job_Count', routes.Order_By_Job_Count)
 app.get('/job_post', routes.job_post)
 
 //cici's code
-app.get('/search_cities/vaccination', routes.search_cities_by_vaccination)
-app.get('/rank_cities', routes.search_cities_by_vaccination)
+app.get('/search_cities_by_vaccination', routes.search_cities_by_vaccination)
+app.get('/rank_cities', routes.rank_cities)
 app.get('/rank_cities_by_vaccination_rate', routes.rank_cities_by_vaccination_rate)
 
 //xiting's code
