@@ -396,6 +396,7 @@ async function rank_cities_by_vaccination_rate(req, res) {
 }
 
 //Yugui's Code: Page 2 Search by house price
+///search/house_price?lower=300&higher=350
 async function search_mode(req, res) {
 
     // const pagesize = req.params.pagesize ? parseInt(req.params.pagesize) : 10
@@ -403,7 +404,7 @@ async function search_mode(req, res) {
     const higher_bound = req.query.lower ? parseInt(req.query.higher) : 0
 
     // Search by House Price
-    if (req.params.choice === 'house price') {
+    if (req.params.criteria == 'house_price') {
         connection.query(`SELECT county AS City, med_ppsf AS Med_Price_Per_SF, state AS State  
         FROM HOUSE_PRICE
         WHERE med_ppsf >= ${lower_bound} AND med_ppsf <= ${higher_bound} 
@@ -423,15 +424,16 @@ async function search_mode(req, res) {
 }
 
 //Yugui's Code: Page 3 Descriptive Ranking by House Price
+//rank/house_price?city=seattle
 async function rank_by_house_price(req, res) {
     const city_name = req.query.city ? req.query.city : ''
     connection.query(`SELECT county AS City, state AS State, med_ppsf AS Med_Price_Per_SF,
         CASE
         WHEN med_ppsf >= 700 THEN 'Super Expensive'
-        WHEN med_ppsf >= 500 AND COUNT(_id) < 700 THEN 'Expensive'
-        WHEN med_ppsf >= 300 AND COUNT(_id) < 500 THEN 'Average'
-        WHEN med_ppsf >= 100 AND COUNT(_id) < 300 THEN 'Cheap'
-        WHEN med_ppsf >= 0 AND COUNT(_id) <  100 THEN 'Super Cheap'
+        WHEN med_ppsf >= 500 AND med_ppsf < 700 THEN 'Expensive'
+        WHEN med_ppsf >= 300 AND med_ppsf < 500 THEN 'Average'
+        WHEN med_ppsf >= 100 AND med_ppsf < 300 THEN 'Cheap'
+        WHEN med_ppsf >= 0 AND med_ppsf <  100 THEN 'Super Cheap'
         ELSE ' '
         END AS House_Price_Grade
     FROM HOUSE_PRICE
@@ -448,11 +450,12 @@ async function rank_by_house_price(req, res) {
 }
 
 //Yugui's Code: Page 4 Criteria Search by House Price
+///order/house_price/sellers_market
 async function order_by_house_price(req, res) {
 
     const num_of_results = req.query.num ? parseInt(req.query.num) : 10
     //HOUSE PRICE PER AREA DESCENDING
-    if (req.params.choice === 'ppsf desc') {
+    if (req.params.choice === 'ppsf_desc') {
         connection.query(`SELECT county, state, med_ppsf
         FROM HOUSE_PRICE
         ORDER BY med_ppsf DESC
@@ -467,7 +470,7 @@ async function order_by_house_price(req, res) {
             }
         });
     //HOUSE PRICE PER AREA ASCENDING
-    } else if (req.params.choice === 'ppsf asce'){
+    } else if (req.params.choice === 'ppsf_asce'){
         connection.query(`SELECT county, state, med_ppsf
         FROM HOUSE_PRICE
         WHERE med_ppsf IS NOT NULL
@@ -483,7 +486,7 @@ async function order_by_house_price(req, res) {
             }
         });
     //HOUSE LISTING
-    } else if (req.params.choice === 'Listed House'){
+    } else if (req.params.choice === 'listed_house'){
         connection.query(`SELECT county, state, ave_listing
         FROM HOUSE_PRICE
         ORDER BY ave_listing DESC
@@ -498,7 +501,7 @@ async function order_by_house_price(req, res) {
             }
         });
     // HOUSE SOLD
-    } else if (req.params.choice === 'Sold House'){
+    } else if (req.params.choice === 'sold_house'){
         connection.query(`SELECT county, state, ave_Sold
         FROM HOUSE_PRICE
         ORDER BY ave_Sold DESC
@@ -513,7 +516,7 @@ async function order_by_house_price(req, res) {
             }
         });
     //IF YOU WANT TO BUY YOU SHOULD GO..
-    } else if (req.params.choice === 'Buyers Market'){
+    } else if (req.params.choice === 'buyers_market'){
         connection.query(`SELECT county, state, ave_listing/ave_Sold AS listing_sold_ratio
         FROM HOUSE_PRICE
         ORDER BY ave_listing/ave_Sold DESC
@@ -528,7 +531,7 @@ async function order_by_house_price(req, res) {
             }
         });
     //IF YOU WANT TO SELL YOU SHOULD GO..
-    } else if (req.params.choice === 'Sellers Market'){
+    } else if (req.params.choice === 'sellers_market'){
         connection.query(`SELECT county, state, ave_listing/ave_Sold AS listing_sold_ratio
         FROM HOUSE_PRICE
         WHERE ave_listing IS NOT NULL
@@ -545,7 +548,7 @@ async function order_by_house_price(req, res) {
             }
         });
     //IF YOU WANT TO GO SOMEWHERE WITH HIGHEST RAISING AMOUNT
-    } else if (req.params.choice === 'Go To the Moon Market'){
+    } else if (req.params.choice === 'crazy_market'){
         connection.query(`SELECT county, state, med_listing_ppsf - med_ppsf AS list_sold_difference
         FROM HOUSE_PRICE
         ORDER BY med_listing_ppsf - med_ppsf DESC        
@@ -567,12 +570,11 @@ async function order_by_house_price(req, res) {
 //Yugui's Code: Page 5 Compare two City by house price
 async function compare_by_house_price(req, res) {
 
-    const city_A = req.query.city_A ? parseInt(req.query.city_A) : ''
-    const city_B = req.query.city_B ? parseInt(req.query.city_B) : ''
+    const city = req.query.city ? req.query.city : ''
 
     connection.query(`SELECT county, state, med_price
     FROM HOUSE_PRICE
-    WHERE county LIKE "%${city_A}%" OR county LIKE "%${city_B}%"
+    WHERE county LIKE "%${city}%"
     `, function (error, results, fields) {
         if (error) {
             console.log(error)

@@ -26,7 +26,7 @@ app.get('/search_cities/rent', routes.search_by_rent)
 app.get('/order/rent',routes.order_by_rent)
 
 //Yugui's code
-app.get('/search/:choice', routes.search_mode)
+app.get('/search/:criteria', routes.search_mode)
 app.get('/rank/house_price', routes.rank_by_house_price)
 app.get('/order/house_price/:choice', routes.order_by_house_price)
 app.get('/compare/house_price', routes.compare_by_house_price)
