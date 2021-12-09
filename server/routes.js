@@ -284,7 +284,7 @@ async function data_by_city(req, res) {
         GROUP BY city, state
     )
     SELECT DISTINCT c.city, s.state_name, h.med_price, v.people_fully_vaccinated_per_hundred, cr.crime_rate_per_100000,
-        j.num_of_jobs
+        j.num_of_jobs, r.average_rent
     FROM US_Cities c
     LEFT JOIN US_States s ON c.state_id = s.state_id
     LEFT JOIN US_Counties ct ON ct.county_fips = c.county_fips
@@ -293,7 +293,7 @@ async function data_by_city(req, res) {
     LEFT JOIN CRIME_RATE cr ON cr.fips_county = c.county_fips
     LEFT JOIN JOB_COUNT j ON j.city = c.city
     LEFT JOIN RENT r ON r.city = c.city AND r.state = c.state_id
-    WHERE c.city = '${city}' AND c.state_id = '${stateID}';
+    WHERE c.city = '${city}' AND c.state_id = '${stateID}' AND v.date ='11/10/21';
     `;
     connection.query(sql, function (error, results, fields) {
         if (error) {
@@ -602,5 +602,7 @@ module.exports = {
     search_mode,
     rank_by_house_price,
     order_by_house_price,
-    compare_by_house_price
+    compare_by_house_price,
+    search_by_rent,
+    order_by_rent
 }
