@@ -14,7 +14,7 @@ app.get('/job_post', routes.job_post)
 
 // //cici's code
 app.get('/search_cities_by_vaccination', routes.search_cities_by_vaccination)
-app.get('/rank_cities', routes.rank_cities)
+app.get('/search/cityName', routes.rank_cities)
 app.get('/rank_cities_by_vaccination_rate', routes.rank_cities_by_vaccination_rate)
 
 // //xiting's code
@@ -24,6 +24,7 @@ app.get('/order/crimeRate', routes.order_by_crime_rate)
 app.get('/compare/city', routes.data_by_city)
 app.get('/search/rent', routes.search_by_rent)
 app.get('/order/rent',routes.order_by_rent)
+app.get('/search/criterias', routes.search_by_criterias)
 
 //Yugui's code
 app.get('/search/:criteria', routes.search_mode)
