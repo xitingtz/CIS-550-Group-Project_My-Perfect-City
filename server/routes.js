@@ -517,25 +517,6 @@ async function order_by_house_price(req, res) {
     });
 }
 
-//Page 5 Compare two City by house price
-async function compare_by_house_price(req, res) {
-
-    const city = req.query.city ? req.query.city : ''
-
-    connection.query(`SELECT county, state, med_price
-    FROM HOUSE_PRICE
-    WHERE county LIKE "%${city}%"
-    `, function (error, results, fields) {
-        if (error) {
-            console.log(error)
-            res.json({ error: error })
-        } else if (results) {
-            res.json({ results: results })
-        } else {
-            res.json({})
-        }
-    }); 
-}
 
 //all cities
 async function all_cities(req, res) {
@@ -559,6 +540,48 @@ async function all_cities(req, res) {
         });
 }
 
+async function compare(req, res) {
+
+    const city_A = req.query.city_A ? req.query.city_A : ''
+    const state_A = req.query.state_A ? req.query.state_A : ''
+    const city_B = req.query.city_B ? req.query.city_B : ''
+    const state_B = req.query.state_B ? req.query.state_B : ''
+
+    connection.query(`WITH JOB_COUNT AS (
+        SELECT locality AS city, COUNT(_id) AS num_of_jobs
+        FROM JOB_POSTS
+        GROUP BY city
+        ),
+        RENT AS (
+            SELECT city, state, AVG(price) AS average_rent
+            FROM Rental_Properties
+            GROUP BY city, state
+        )
+        SELECT DISTINCT c.city AS city, s.state_name AS state, h.med_price AS house_price, v.people_fully_vaccinated_per_hundred AS vaccination, 
+        cr.crime_rate_per_100000 AS crime_rate, j.num_of_jobs AS job, r.average_rent AS rent
+        FROM US_Cities c
+        LEFT JOIN US_States s ON c.state_id = s.state_id
+        LEFT JOIN US_Counties ct ON ct.county_fips = c.county_fips
+        LEFT JOIN VACCINATION v ON v.state_name = s.state_name
+        LEFT JOIN HOUSE_PRICE h ON h.county = c.city
+        LEFT JOIN CRIME_RATE cr ON cr.fips_county = c.county_fips
+        LEFT JOIN JOB_COUNT j ON j.city = c.city
+        LEFT JOIN RENT r ON r.city = c.city AND r.state = c.state_id
+        WHERE v.date = '11/10/21' AND 
+        ((c.city LIKE '${city_A}' AND c.state_name LIKE '${state_A}') OR
+        (c.city LIKE '${city_B}' AND c.state_name LIKE '${state_B}')) ;
+    `, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        } else {
+            res.json({})
+        }
+    }); 
+}
+
 module.exports = {
     search_by_job_count,
     Job_Market_Grade,
@@ -574,8 +597,9 @@ module.exports = {
     search_mode,
     rank_by_house_price,
     order_by_house_price,
-    compare_by_house_price,
     search_by_rent,
     order_by_rent,
-    search_by_criterias
+    search_by_criterias,
+    all_cities,
+    compare
 }
