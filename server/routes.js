@@ -2,7 +2,6 @@ const config = require('./config.json')
 const mysql = require('mysql');
 const e = require('express');
 
-// TODO: fill in your connection details here
 const connection = mysql.createConnection({
     host: config.rds_host,
     user: config.rds_user,
@@ -98,14 +97,14 @@ async function search_by_job_count(req, res) {
         });
 }
 
-// search by crime rate(Xiting)
+// search by crime rate
 async function search_by_crime_rate(req, res) {
     const crimeRateHigh = req.query.crimeRateHigh ? req.query.crimeRateHigh : 1800;
     const query =`
     SELECT ct.city, ct.state_id, cr.crime_rate_per_100000
     FROM US_Cities ct JOIN CRIME_RATE cr ON ct.county_fips = cr.fips_county
     WHERE cr.crime_rate_per_100000 <= ${crimeRateHigh} AND cr.crime_rate_per_100000 > 0
-    ORDER BY crime_rate_per_100000;
+    ORDER BY crime_rate_per_100000 ASC;
     `;
     connection.query(query, function (error, results, fields) {
         if (error) {
@@ -121,7 +120,7 @@ async function search_by_crime_rate(req, res) {
     });
 }
 
-//search by rent(Xiting)
+//search by rent
 async function search_by_rent(req, res) {
     const avgRentLow = req.query.avgRentLow ? req.query.avgRentLow : 0;
     const avgRentHigh = req.query.avgRentHigh ? req.query.avgRentHigh : 190000.00;
@@ -162,7 +161,7 @@ async function search_by_rent(req, res) {
     });
 }
 
-// Cici's code: Page 2 - Search Mode - search cities by vaccination with minimum rate 
+// Page 2 - Search Mode - search cities by vaccination with minimum rate 
 async function search_cities_by_vaccination(req, res) {
 
     const minimum_vaccination_rate = req.query.minimum_vaccination_rate? req.query.minimum_vaccination_rate : 0;
@@ -203,7 +202,7 @@ async function Job_Market_Grade(req, res) {
         });
 }
 
-//crime rate grade(Xiting)
+//crime rate grade
 async function safety_grade(req, res) {
     const city = req.query.city? req.query.city : "";
     const stateID = req.query.stateID? req.query.stateID : "";
@@ -251,7 +250,7 @@ async function Order_By_Job_Count(req, res) {
         });
 }
 
-// page 4 order by crime rate(Xiting)
+// page 4 order by crime rate
 async function order_by_crime_rate(req, res) {
     const num_of_cities = req.query.num_of_cities? req.query.num_of_cities : 10;
     const sql =`
@@ -269,7 +268,7 @@ async function order_by_crime_rate(req, res) {
      SELECT city, state_id, crime_rate_per_100000
      FROM CRIME_RATE cr JOIN Top_City_By_County ct ON cr.fips_county = ct.county_fips
      WHERE crime_rate_per_100000 > 0
-     ORDER BY crime_rate_per_100000
+     ORDER BY crime_rate_per_100000 ASC
      LIMIT ${num_of_cities};
     `;
     connection.query(sql, function (error, results, fields) {
@@ -286,7 +285,6 @@ async function order_by_crime_rate(req, res) {
     });
 }
 
-//order by average rent(Xiting)
 async function order_by_rent(req, res) {
     const num_of_cities = req.query.num_of_cities? req.query.num_of_cities : 10;
     const sql = `
@@ -328,7 +326,7 @@ async function job_post(req, res) {
         });
 }
 
-//page 5 compare two cities (Xiting)
+//page 5 compare two cities
 async function data_by_city(req, res) {
     const city = req.query.city;
     const stateID = req.query.stateID;
@@ -370,7 +368,7 @@ async function data_by_city(req, res) {
 }
 
 
-// Cici's code: Page 3 - City Rank Mode - rank criterias for a single city criterias - tested
+// Page 3 - City Rank Mode - rank criterias for a single city criterias - tested
 async function rank_cities(req, res) {
 
     const city_name = req.query.city_name;
@@ -410,7 +408,7 @@ async function rank_cities(req, res) {
     });
 }
 
-// Cici's code: page 4 Criteria Rank Mode - rank top 10 cities by vaccination rate
+// page 4 Criteria Rank Mode - rank top 10 cities by vaccination rate
 async function rank_cities_by_vaccination_rate(req, res) {
 
     connection.query(`WITH VACCINATION_MAP as (
@@ -442,7 +440,7 @@ async function rank_cities_by_vaccination_rate(req, res) {
     });
 }
 
-//Yugui's Code: Page 2 Search by house price
+//Page 2 Search by house price
 ///search/house_price?lower=300&higher=350
 async function search_mode(req, res) {
 
@@ -470,7 +468,7 @@ async function search_mode(req, res) {
     }
 }
 
-//Yugui's Code: Page 3 Descriptive Ranking by House Price
+//Page 3 Descriptive Ranking by House Price
 //rank/house_price?city=seattle
 async function rank_by_house_price(req, res) {
     const city_name = req.query.city ? req.query.city : ''
@@ -496,125 +494,24 @@ async function rank_by_house_price(req, res) {
     }); 
 }
 
-//Yugui's Code: Page 4 Criteria Search by House Price
-///order/house_price/sellers_market
-async function order_by_house_price(req, res) {
 
-    const num_of_results = req.query.num ? parseInt(req.query.num) : 10
-    //HOUSE PRICE PER AREA DESCENDING
-    if (req.params.choice === 'ppsf_desc') {
-        connection.query(`SELECT county, state, med_ppsf
-        FROM HOUSE_PRICE
-        ORDER BY med_ppsf DESC
-        LIMIT ${num_of_results}`, function (error, results, fields) {
-            if (error) {
-                console.log(error)
-                res.json({ error: error })
-            } else if (results) {
-                res.json({ results: results })
-            } else {
-                res.json({})
-            }
-        });
-    //HOUSE PRICE PER AREA ASCENDING
-    } else if (req.params.choice === 'ppsf_asce'){
-        connection.query(`SELECT county, state, med_ppsf
-        FROM HOUSE_PRICE
-        WHERE med_ppsf IS NOT NULL
-        ORDER BY med_ppsf
-        LIMIT ${num_of_results}`, function (error, results, fields) {
-            if (error) {
-                console.log(error)
-                res.json({ error: error })
-            } else if (results) {
-                res.json({ results: results })
-            } else {
-                res.json({})
-            }
-        });
-    //HOUSE LISTING
-    } else if (req.params.choice === 'listed_house'){
-        connection.query(`SELECT county, state, ave_listing
-        FROM HOUSE_PRICE
-        ORDER BY ave_listing DESC
-        LIMIT ${num_of_results}`, function (error, results, fields) {
-            if (error) {
-                console.log(error)
-                res.json({ error: error })
-            } else if (results) {
-                res.json({ results: results })
-            } else {
-                res.json({})
-            }
-        });
-    // HOUSE SOLD
-    } else if (req.params.choice === 'sold_house'){
-        connection.query(`SELECT county, state, ave_Sold
-        FROM HOUSE_PRICE
-        ORDER BY ave_Sold DESC
-        LIMIT ${num_of_results}`, function (error, results, fields) {
-            if (error) {
-                console.log(error)
-                res.json({ error: error })
-            } else if (results) {
-                res.json({ results: results })
-            } else {
-                res.json({})
-            }
-        });
-    //IF YOU WANT TO BUY YOU SHOULD GO..
-    } else if (req.params.choice === 'buyers_market'){
-        connection.query(`SELECT county, state, ave_listing/ave_Sold AS listing_sold_ratio
-        FROM HOUSE_PRICE
-        ORDER BY ave_listing/ave_Sold DESC
-        LIMIT ${num_of_results}`, function (error, results, fields) {
-            if (error) {
-                console.log(error)
-                res.json({ error: error })
-            } else if (results) {
-                res.json({ results: results })
-            } else {
-                res.json({})
-            }
-        });
-    //IF YOU WANT TO SELL YOU SHOULD GO..
-    } else if (req.params.choice === 'sellers_market'){
-        connection.query(`SELECT county, state, ave_listing/ave_Sold AS listing_sold_ratio
-        FROM HOUSE_PRICE
-        WHERE ave_listing IS NOT NULL
-        AND ave_Sold IS NOT NULL
-        ORDER BY ave_listing/ave_Sold        
-        LIMIT ${num_of_results}`, function (error, results, fields) {
-            if (error) {
-                console.log(error)
-                res.json({ error: error })
-            } else if (results) {
-                res.json({ results: results })
-            } else {
-                res.json({})
-            }
-        });
-    //IF YOU WANT TO GO SOMEWHERE WITH HIGHEST RAISING AMOUNT
-    } else if (req.params.choice === 'crazy_market'){
-        connection.query(`SELECT county, state, med_listing_ppsf - med_ppsf AS list_sold_difference
-        FROM HOUSE_PRICE
-        ORDER BY med_listing_ppsf - med_ppsf DESC        
-        LIMIT ${num_of_results}`, function (error, results, fields) {
-            if (error) {
-                console.log(error)
-                res.json({ error: error })
-            } else if (results) {
-                res.json({ results: results })
-            } else {
-                res.json({})
-            }
-        });
-    } else {
-        res.json({ message: `Error` })
-    }
+
+
+async function order_by_house_price(req, res) {
+    connection.query(`SELECT county, med_ppsf
+    FROM HOUSE_PRICE
+    ORDER BY med_ppsf DESC
+    LIMIT 10;`, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            res.json({ error: error })
+        } else if (results) {
+            res.json({ results: results })
+        }
+    });
 }
 
-//Yugui's Code: Page 5 Compare two City by house price
+//Page 5 Compare two City by house price
 async function compare_by_house_price(req, res) {
 
     const city = req.query.city ? req.query.city : ''
