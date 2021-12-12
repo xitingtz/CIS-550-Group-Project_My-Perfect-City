@@ -557,7 +557,7 @@ async function compare(req, res) {
             FROM Rental_Properties
             GROUP BY city, state
         )
-        SELECT DISTINCT c.city AS city, s.state_name AS state, h.med_price AS house_price, v.people_fully_vaccinated_per_hundred AS vaccination, 
+        SELECT DISTINCT c.city AS city, s.state_id AS state, h.med_price AS house_price, v.people_fully_vaccinated_per_hundred AS vaccination, 
         cr.crime_rate_per_100000 AS crime_rate, j.num_of_jobs AS job, r.average_rent AS rent
         FROM US_Cities c
         LEFT JOIN US_States s ON c.state_id = s.state_id
@@ -568,8 +568,8 @@ async function compare(req, res) {
         LEFT JOIN JOB_COUNT j ON j.city = c.city
         LEFT JOIN RENT r ON r.city = c.city AND r.state = c.state_id
         WHERE v.date = '11/10/21' AND 
-        ((c.city LIKE '${city_A}' AND c.state_name LIKE '${state_A}') OR
-        (c.city LIKE '${city_B}' AND c.state_name LIKE '${state_B}')) ;
+        ((c.city LIKE '${city_A}' AND s.state_id LIKE '${state_A}') OR
+        (c.city LIKE '${city_B}' AND s.state_id LIKE '${state_B}')) ;
     `, function (error, results, fields) {
         if (error) {
             console.log(error)
