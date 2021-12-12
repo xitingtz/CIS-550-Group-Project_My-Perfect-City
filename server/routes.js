@@ -165,7 +165,13 @@ async function search_by_rent(req, res) {
 async function search_cities_by_vaccination(req, res) {
 
     const minimum_vaccination_rate = req.query.minimum_vaccination_rate? req.query.minimum_vaccination_rate : 0;
-        connection.query(`
+        connection.query(`SELECT c.city, s.state_name, v.people_fully_vaccinated_per_hundred
+        from US_Cities c
+        join US_States s on c.state_id = s.state_id
+        join VACCINATION v on v.state_name = s.state_name
+        where v.people_fully_vaccinated_per_hundred >= ${minimum_vaccination_rate}
+        and v.date = '11/10/21'
+        order by v.people_fully_vaccinated_per_hundred desc;
         `, function (error, results, fields) {
             if (error) {
                 console.log(error)
@@ -529,6 +535,28 @@ async function compare_by_house_price(req, res) {
             res.json({})
         }
     }); 
+}
+
+//all cities
+async function all_cities(req, res) {
+
+        connection.query(`SELECT c.city, s.state_name, v.people_fully_vaccinated_per_hundred, h.med_price, count(j._id) as job_count, cr.crime_rate_per_100000
+        from US_Cities c
+        left outer join US_States s on c.state_id = s.state_id
+        left outer join VACCINATION v on v.state_name = s.state_name
+        left outer join JOB_POSTS j on j.locality = c.city
+        left outer join HOUSE_PRICE h on h.county = c.city
+        left outer join CRIME_RATE cr on cr.fips_county = c.county_fips
+        where v.date = '11/10/21'
+        group by c.city
+        `, function (error, results, fields) {
+            if (error) {
+                console.log(error)
+                res.json({ error: error })
+            } else if (results) {
+                res.json({ results: results })
+            }
+        });
 }
 
 module.exports = {
