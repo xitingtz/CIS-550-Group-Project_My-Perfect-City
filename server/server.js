@@ -25,6 +25,7 @@ app.get('/search/:criteria', routes.search_mode)
 app.get('/rank/house_price', routes.rank_by_house_price)
 app.get('/order/house_price/:choice', routes.order_by_house_price)
 app.get('/compare/house_price', routes.compare_by_house_price)
+app.get('/all_cities', routes.all_cities)
 
 
 app.listen(config.server_port, () => {
