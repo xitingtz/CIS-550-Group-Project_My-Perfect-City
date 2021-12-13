@@ -563,7 +563,7 @@ async function compare(req, res) {
         LEFT JOIN US_States s ON c.state_id = s.state_id
         LEFT JOIN US_Counties ct ON ct.county_fips = c.county_fips
         LEFT JOIN VACCINATION v ON v.state_name = s.state_name
-        LEFT JOIN HOUSE_PRICE h ON h.county = c.city
+        LEFT JOIN HOUSE_PRICE h ON h.county = c.city AND h.state = c.state_id
         LEFT JOIN CRIME_RATE cr ON cr.fips_county = c.county_fips
         LEFT JOIN JOB_COUNT j ON j.city = c.city
         LEFT JOIN RENT r ON r.city = c.city AND r.state = c.state_id
