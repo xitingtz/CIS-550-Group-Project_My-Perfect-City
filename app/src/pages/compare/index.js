@@ -122,11 +122,11 @@ export default function Compare() {
             <Header />
             <div className={styles.wrapper}>
                 <div className={styles.inputWrapper}>
-                    <input type={'input'} placeholder={'input City'} ref={leftCity} ></input>
-                    <input type={'input'} placeholder={'input State'} ref={leftState} ></input>
+                    <input type={'input'} placeholder={'Input City'} ref={leftCity} ></input>
+                    <input type={'input'} placeholder={'Input State'} ref={leftState} ></input>
                     <span>VS</span>
-                    <input type={'input'} placeholder={'input City'} ref={rightCity} ></input>
-                    <input type={'input'} placeholder={'input State'} ref={rightState} ></input>
+                    <input type={'input'} placeholder={'Input City'} ref={rightCity} ></input>
+                    <input type={'input'} placeholder={'Input State'} ref={rightState} ></input>
                     <Button type="primary" loading={loading} onClick={() => {comparing()}}>
                         COMPARE
                     </Button>

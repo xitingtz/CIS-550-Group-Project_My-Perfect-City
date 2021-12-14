@@ -28,7 +28,7 @@ export default function Header(props) {
     
     return (
         <div className={[styles.header, classname ||''].join(' ')}>
-            <p className={styles.p} onClick={()=> gotoPath('/')}>PERFERT CITY</p>
+            <p className={styles.p} onClick={()=> gotoPath('/')}>PERFECT CITY</p>
             <div className={styles.nav}>
                 {nav.map((item,index)=>{
                     return <p className={[styles.p, index === active ? styles.active : ''].join(' ') }  key={item.title} onClick={()=> gotoPath(item.path, index)}>{item.title}</p>
