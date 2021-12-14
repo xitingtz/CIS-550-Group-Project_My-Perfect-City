@@ -75,10 +75,10 @@ export default function Search() {
     const [searchLoading, setsearchLoading] = useState([])
     const [searchCriteriaData, setsearchCriteriaData] = useState({
       vaccination_rate: [0, 100],
-      crime_rate: [0, 100],
-      house_price: [0, 100],
-      pouse_jobs: [0, 100],
-      polulation: [0, 1000000000]
+      crime_rate: [0, 1800],
+      house_price: [0, 1392084],
+      posted_jobs: [0, 1176],
+      population: [0, 18713220]
     })
     const [searchCriteriaRes, setsearchCriteriaRes] = useState([])
     useEffect(() => {
@@ -115,10 +115,10 @@ export default function Search() {
             crimeRateHigh: searchCriteriaData.crime_rate[1],
             housePriceLow: searchCriteriaData.house_price[0],
             housePriceHigh: searchCriteriaData.house_price[1],
-            jobCountLow: searchCriteriaData.pouse_jobs[0],
-            jobCountHigh: searchCriteriaData.pouse_jobs[1],
-            populationLow: searchCriteriaData.polulation[0],
-            'polulationHigh%20':'%20'+ searchCriteriaData.polulation[1]
+            jobCountLow: searchCriteriaData.posted_jobs[0],
+            jobCountHigh: searchCriteriaData.posted_jobs[1],
+            populationLow: searchCriteriaData.population[0],
+            'populationHigh%20':'%20'+ searchCriteriaData.population[1]
           }
         })
         setsearchCriteriaRes(results)
@@ -140,21 +140,21 @@ export default function Search() {
         setsearchLoading([...newd])
         const data = [results[0].crime_rank, results[0].vaccination_rank, /*results[0].crime_rank,*/ results[0].job_rank]
         setxDate(data)
-        setyDate(['Crime Rate Rank', 'Vaccination Rank', 'Posted Jobs Rank'])
+        setyDate(['Crime Rate', 'Vaccination Rate', 'Posted Jobs'])
       }
     }
     const sliderData = [
       {
-        name: 'Polulation',
-        id: 'polulation',
+        name: 'Population',
+        id: 'population',
         min: 0,
-        max: 1000000000
+        max: 18713220
       },
       {
-        name: 'Crime Rate',
+        name: 'Crime Rate Per 100000',
         id: 'crime_rate',
         min: 0,
-        max: 100
+        max: 1800
       },
       {
         name: 'Vaccination Rate',
@@ -166,13 +166,13 @@ export default function Search() {
         name: 'House Price',
         id: 'house_price',
         min: 0,
-        max: 100000
+        max: 1392084
       },
       {
         name: 'Posted Jobs',
-        id: 'pouse_jobs',
+        id: 'posted_jobs',
         min: 0,
-        max: 10000000
+        max: 1176
       }
     ]
     const formatter = (value, max) => {
@@ -190,8 +190,8 @@ export default function Search() {
                 <TabPane tab={'City Name Search'} key={'City Nmae Search'}>
                     <div className={styles.searchCity}>
                         <div className={styles.searchCityTop}>
-                          <input type={'input'} placeholder={'City'} ref={searchrefCity} ></input>
-                          <input type={'input'} placeholder={'State'} ref={searchrefState} ></input>
+                          <input type={'input'} placeholder={'Input City'} ref={searchrefCity} ></input>
+                          <input type={'input'} placeholder={'Input State(i.e. PA)'} ref={searchrefState} ></input>
                           <Button type="primary" loading={searchLoading[0]} onClick={() => {searchCity(0)}}>
                               SEARCH
                           </Button>
@@ -233,7 +233,7 @@ export default function Search() {
                     </div>
                     <div className={styles.res}>
                       <h1>RESULTS</h1>
-                      {searchCriteriaRes.map((item)=> <p>CITY: {item.city}; STATE: {item.state_id} ;</p>)}
+                      {searchCriteriaRes.map((item)=> <p> {item.city}; {item.state_id} ;</p>)}
                     </div>
                 </TabPane>
              </Tabs>  
