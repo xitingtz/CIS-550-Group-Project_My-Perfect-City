@@ -14,10 +14,13 @@ connection.connect();
 //search by all critria
 async function search_by_criterias(req, res) {
     const vaccinationRateLow = req.query.vaccinationLow ? req.query.vaccinationLow : 0
+    const vaccinationRateHigh = req.query.vaccinationHigh ? req.query.vaccinationHigh : 100
     const crimeRateLow = req.query.crimeRateLow ? req.query.crimeRateLow : 0
+    const crimeRateHigh = req.query.crimeRateHigh ? req.query.crimeRateHigh : 1800
     const housePriceLow = req.query.housePriceLow ? req.query.housePriceLow : 0
-    const housePriceHigh = req.query.housePriceHigh ? req.query.housePriceHigh : 1000000000
+    const housePriceHigh = req.query.housePriceHigh ? req.query.housePriceHigh : 1392084
     const jobCountLow = req.query.jobCountLow ? req.query.jobCountLow : 0
+    const jobCountHigh = req.query.jobCountHigh ? req.query.jobCountHigh : 1176
     const populationLow = req.query.polulationLow ? req.query.populationLow : 1
     const populationHigh = req.query.polulationHigh ? req.query.populationHigh : 18713220
 
@@ -27,40 +30,37 @@ async function search_by_criterias(req, res) {
         from US_Cities c
         join US_States s on c.state_id = s.state_id
         join VACCINATION v on v.state_name = s.state_name
-        where v.people_fully_vaccinated_per_hundred >= ${vaccinationRateLow} AND v.date = '11/10/21'
-        order by v.people_fully_vaccinated_per_hundred desc
+        where v.people_fully_vaccinated_per_hundred >= ${vaccinationRateLow} AND v.people_fully_vaccinated_per_hundred <= ${vaccinationRateHigh}
+         AND v.date = '11/10/21'
     ),
     crimeRate AS(
         SELECT ct.city, ct.state_id, cr.crime_rate_per_100000
         FROM US_Cities ct JOIN CRIME_RATE cr ON ct.county_fips = cr.fips_county
-        WHERE cr.crime_rate_per_100000 >= ${crimeRateLow}
-        ORDER BY crime_rate_per_100000
+        WHERE cr.crime_rate_per_100000 >= ${crimeRateLow} AND cr.crime_rate_per_100000 <= ${crimeRateHigh}
     ),
     housePrice AS(
-        SELECT county AS city, med_ppsf AS Med_Price_Per_SF, state AS state_id
+        SELECT county AS city, med_price AS Med_Price_Per_SF, state AS state_id
         FROM HOUSE_PRICE
-        WHERE med_ppsf >= ${housePriceLow} AND med_ppsf <= ${housePriceHigh}
-        ORDER BY med_ppsf DESC
+        WHERE med_price >= ${housePriceLow} AND med_price <= ${housePriceHigh}
     ),
     jobCount AS(
-        SELECT locality as city, region as state_id, COUNT(_id) as num_of_jobs
-        from JOB_POSTS
-        group by city
-        HAVING COUNT(_id) >= ${jobCountLow}
-        order by num_of_jobs DESC
+        SELECT c.city, c.state_id, COUNT(_id) as num_of_jobs
+        from US_Cities c JOIN JOB_POSTS j ON c.city = j.locality AND c.state_id = j.region
+        group by j.locality, j.region
+        HAVING COUNT(_id) >= ${jobCountLow} AND COUNT(_id) <= ${jobCountHigh}
     ),
     population AS(
         SELECT city, state_id, population
         FROM US_Cities
         WHERE population >= ${populationLow} AND population <= ${populationHigh}
-        order by population DESC
     )
-    SELECT p.city, p.state_id
+    SELECT DISTINCT p.city,p. state_id
     FROM population p
-    LEFT JOIN vaccinationRate v ON p.city = v.city AND p.state_id = v.state_id
-    LEFT JOIN crimeRate cr ON p.city = cr.city AND p.state_id = cr.state_id
-    LEFT JOIN housePrice h ON p.city = h.city AND p.state_id = h.state_id
-    LEFT JOIN jobCount j ON p.city = j.city AND p.state_id = j.state_id
+    INNER JOIN vaccinationRate v ON p.city = v.city AND p.state_id = v.state_id
+    INNER JOIN crimeRate cr ON p.city = cr.city AND p.state_id = cr.state_id
+    INNER JOIN housePrice h ON p.city = h.city
+    INNER JOIN jobCount j ON p.city = j.city AND p.state_id = j.state_id
+    ORDER BY p.population DESC
     LIMIT 10;
     `;
     connection.query(query, function (error, results, fields) {
