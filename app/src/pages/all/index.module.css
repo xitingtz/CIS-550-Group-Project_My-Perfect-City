@@ -1,0 +1,19 @@
+.wrapper{
+    padding: 40px;
+    background-color: #fff;
+    min-height: 700px;
+}
+.all{
+    width: 100%;
+    min-height: 700px;
+}
+.all :global(.ant-pagination){
+    position: absolute;
+    top: -85px;
+    right: 0;
+}
+.top{
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}

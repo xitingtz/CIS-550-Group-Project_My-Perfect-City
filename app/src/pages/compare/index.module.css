@@ -1,0 +1,32 @@
+.wrapper{
+    padding: 40px;
+    background-color: #fff;
+    min-height: 600px;
+}
+.compare{
+    width: 100%;
+    height: 100%;
+}
+.compareBar{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.inputWrapper{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    font-size: 18px;
+}
+input{
+    height: 30px;
+    border-radius: 10px;
+    margin: 0 10px;
+    text-align: center;
+}
+.bar{
+    background-color: #F7F7F7;
+    margin: 20px;
+}
