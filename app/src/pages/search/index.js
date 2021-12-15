@@ -40,7 +40,7 @@ export default function Search() {
     const callback = async (index) => {
 
     }
-    const onCrimeChange = (id,value) => {
+    const onSearchChange = (id,value) => {
         let n = {...searchCriteriaData}
         n[id] = [...value]
         setsearchCriteriaData({...n})
@@ -156,7 +156,7 @@ export default function Search() {
                                                   step={10}
                                                   tipFormatter={(value) => formatter(value, item.max)}
                                                   defaultValue={[item.min, item.max]}
-                                                  onChange={(value)=>onCrimeChange(item.id,value)}
+                                                  onChange={(value)=>onSearchChange(item.id,value)}
                                                 />
                                               </div>
                                               <p>{item.max}</p>
