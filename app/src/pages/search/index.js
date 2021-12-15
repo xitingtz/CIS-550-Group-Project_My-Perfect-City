@@ -14,57 +14,12 @@ const { TabPane } = Tabs;
 function RankBar(props) {
     const {id, xData, yData} = props;
     console.log(xData, yData)
-    useEffect(() => {
-        
-        var myChart = echarts.init(document.getElementById(id));
-        const  option = {
-            color: '#E5AF9E',
-            grid: {
-              show: false,
-              left: 150
-            },
-            tooltip: {
-              trigger: 'axis',
-              formatter: function(param){
-                return param[0].data + '%'
-              },
-            },
-            xAxis: {
-              type: 'value',
-              axisLine: {show:false},
-              axisTick: {show:false},
-              splitLine: {show: false },
-              axisLabel: {show: false }
-            },
-            yAxis: {
-              inverse: true, 
-              type: 'category',
-              data: yData,
-              // axisLine: {show:false},
-              axisTick: {show:false},
-              axisLabel: {
-                        show: true,
-                        margin: 140,
-                        color: '#333',
-                        fontSize: 14, 
-                        align: 'left', 
-                      }
-            },
-            series: [
-              {
-                barWidth : 20,
-                barCategoryGap: 5,
-                barGap:'80%',
-                data: xData,
-                type: 'bar'
-              }
-            ]
-          };
-      
-        myChart.setOption(option);
-    }, [xData, yData])
-   
-    return <div id={id} style={{width: '400px', height: '500px', margin: '0 auto'}}></div>
+
+    return <div id={id} style={{width: '400px', height: '500px', margin: '40px auto'}}>
+      {yData.map((item, index)=><div className={styles.rankitem}>
+        <h1>{item}</h1><p>{xData[index]}</p>
+      </div>)}
+    </div>
 }
 
 export default function Search() {
@@ -85,18 +40,7 @@ export default function Search() {
         callback(1)
     }, [])
     const callback = async (index) => {
-        // const temp = key[index]
-        // const hide = message.loading('Action in progress..', 0);
-        // const {data:{results}} = await getDate(temp.url)
-        // hide();
-        // const xdata = []
-        // const ydata = []
-        // for(let i = 0; i < results.length; i++){
-        //     xdata.push(results[i][temp.data])
-        //     ydata.push(results[i][temp.dataname])
-        // }
-        // setxDate(xdata)
-        // setyDate(ydata)
+
     }
     const onCrimeChange = (id,value) => {
         let n = {...searchCriteriaData}
@@ -138,9 +82,9 @@ export default function Search() {
         })
         newd[index] = false
         setsearchLoading([...newd])
-        const data = [results[0].crime_rank, results[0].vaccination_rank, /*results[0].crime_rank,*/ results[0].job_rank]
+        const data = [results[0].crime_rank, results[0].vaccination_rank, results[0].job_rank]
         setxDate(data)
-        setyDate(['Crime Rate', 'Vaccination Rate', 'Posted Jobs'])
+        setyDate(['Crime Rate Rank', 'Vaccination Rate Rank', 'Posted Jobs Rank'])
       }
     }
     const sliderData = [

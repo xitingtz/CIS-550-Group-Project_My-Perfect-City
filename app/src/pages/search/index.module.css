@@ -50,3 +50,12 @@ p{
 .res{
     padding: 0 40px 40px 60px;
 }
+.rankitem{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 10px 10px;
+}
+.rankitem h1{
+    width: 200px;
+}
