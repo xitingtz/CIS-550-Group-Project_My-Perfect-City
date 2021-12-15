@@ -392,12 +392,12 @@ async function rank_cities(req, res) {
     from VACCINATION v where v.date ='11/10/21') x on x.state_name = s.state_name
     # join job ranking table
     join
-    (select locality, COUNT(_id),
+    (select locality, region, COUNT(_id),
     RANK() over (
     order by COUNT(_id) desc
     ) job_rank
     from JOB_POSTS
-    group by locality) j on j.locality = c.city
+    group by locality, region) j on j.locality = c.city and j.region = c.state_id
     # join crime ranking table
     join (select *,
     rank() over (
