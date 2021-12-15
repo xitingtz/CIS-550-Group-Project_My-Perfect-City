@@ -2,8 +2,6 @@ import 'antd/dist/antd.less';
 import React, {useEffect, useState, useRef} from 'react'
 import Header from '../../component/head'
 import { Tabs, message, Slider, Button } from 'antd';
-// import echarts from 'echarts/lib/echarts';
-import * as echarts from 'echarts';
 import 'echarts/lib/component/grid'
 import  'echarts/lib/chart/bar';
 import axios from 'axios'
