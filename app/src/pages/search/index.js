@@ -177,7 +177,7 @@ export default function Search() {
                     </div>
                     <div className={styles.res}>
                       <h1>RESULTS</h1>
-                      {searchCriteriaRes.map((item)=> <p> {item.city}; {item.state_id} ;</p>)}
+                      {searchCriteriaRes.map((item)=> <p> {item.city}， {item.state_id} </p>)}
                     </div>
                 </TabPane>
              </Tabs>  
