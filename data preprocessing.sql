@@ -1,0 +1,11 @@
+USE FINAL_550;
+
+CREATE TABLE HOUSE_PRICE_1 AS SELECT *,
+       SUBSTRING_INDEX(region_name, ', ', 1) AS county,
+       SUBSTRING_INDEX(region_name, ', ', -1) AS state
+FROM HOUSE_PRICE;
+
+CREATE TABLE HOUSE_PRICE_2 AS SELECT *,
+       SUBSTRING_INDEX(state, ' ', 1) AS state_id
+FROM HOUSE_PRICE;
+
